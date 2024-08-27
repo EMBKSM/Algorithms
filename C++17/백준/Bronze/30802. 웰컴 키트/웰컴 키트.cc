@@ -24,4 +24,4 @@ int main() {
     }
     cout << cnt << "\n";
     cout << n / P << " " << n % P;
-}
+}//아 집가고 싶다
