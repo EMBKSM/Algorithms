@@ -2,84 +2,53 @@
 using namespace std;
 int cnt = 0;
 
-void createBadCharTable(const string& pattern, vector<int>& badCharTable) {
-    badCharTable.assign(256, -1);
-    for (int i = 0; i < pattern.size(); i++) {
-        badCharTable[pattern[i]] = i;
-    }
-}
-
-
-void createGoodSuffixTable(const string& pattern, vector<int>& goodSuffixTable) {
+vector<int> computePi(const string& pattern) {
     int m = pattern.size();
-    goodSuffixTable.resize(m + 1);
+    vector<int> pi(m, 0);
+    int j = 0; 
 
-    vector<int> border(m + 1, 0);
-    int i = m, j = m + 1;
-    border[i] = j;
-
-
-    while (i > 0) {
-        while (j <= m && pattern[i - 1] != pattern[j - 1]) {
-            if (goodSuffixTable[j] == 0) {
-                goodSuffixTable[j] = j - i;
-            }
-            j = border[j];
+    for (int i = 1; i < m; ++i) {
+        while (j > 0 && pattern[i] != pattern[j]) {
+            j = pi[j - 1]; 
         }
-        i--;
-        j--;
-        border[i] = j;
-    }
-
-
-    for (int i = 0; i <= m; i++) {
-        if (goodSuffixTable[i] == 0) {
-            goodSuffixTable[i] = j;
-        }
-        if (i == j) {
-            j = border[j];
+        if (pattern[i] == pattern[j]) {
+            ++j;
+            pi[i] = j;
         }
     }
+    return pi;
 }
 
 
-void boyerMooreSearch(const string& text, const string& pattern) {
+void kmpSearch(const string& text, const string& pattern) {
     int n = text.size();
     int m = pattern.size();
+    vector<int> pi = computePi(pattern);
+    int j = 0; 
 
-    vector<int> badCharTable;
-    vector<int> goodSuffixTable;
-
-    createBadCharTable(pattern, badCharTable);
-    createGoodSuffixTable(pattern, goodSuffixTable);
-
-    int shift = 0;
-    while (shift <= (n - m)) {
-        int j = m - 1;
-        while (j >= 0 && pattern[j] == text[shift + j]) {
-            j--;
+    for (int i = 0; i < n; ++i) {
+        while (j > 0 && text[i] != pattern[j]) {
+            j = pi[j - 1];
         }
-
-        if (j < 0) {
-            cnt++;
-            shift += goodSuffixTable[0];
-        }
-        else {
-            int goodSuffixShift = (j + 1 < goodSuffixTable.size()) ? goodSuffixTable[j + 1] : m;
-            int badCharShift = max(1, j - badCharTable[text[shift + j]]);
-            shift += max(badCharShift, goodSuffixShift);
+        if (text[i] == pattern[j]) {
+            if (j == m - 1) {
+                cnt++;
+                j = pi[j];
+            }
+            else {
+                ++j;
+            }
         }
     }
     cout << cnt;
 }
-
 int main() {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
     cout.tie(0);
 
     int n, text_len;
-    string ios = "IOI",text;
+    string ios = "IOI", text;
 
     cin >> n;
 
@@ -90,5 +59,5 @@ int main() {
     cin >> text_len;
     cin >> text;
 
-    boyerMooreSearch(text, ios);
+    kmpSearch(text, ios);
 }
