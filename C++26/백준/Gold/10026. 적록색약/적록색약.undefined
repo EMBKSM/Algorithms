@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+void exploring_rg(int start_r, int start_c, vector<vector<char>>& image, vector<vector<bool>>& image_explore, int len_max)
+{
+    queue<pair<int, int>> future_visit;
+    char target_color = image[start_r][start_c];
+    image_explore[start_r][start_c] = true;
+    future_visit.push({ start_r, start_c });
+
+    // 4방향: 상, 하, 좌, 우
+    const int dr[4] = { -1, 1, 0, 0 };
+    const int dc[4] = { 0, 0, -1, 1 };
+
+    while (!future_visit.empty()) {
+        pair<int, int> current = future_visit.front();
+        int r = current.first;
+        int c = current.second;
+        future_visit.pop();
+
+        for (int d = 0; d < 4; ++d) {
+            int nr = r + dr[d];
+            int nc = c + dc[d];
+            if (nr < 0 || nr >= len_max || nc < 0 || nc >= len_max) continue;
+
+            if (!image_explore[nr][nc]) {
+                if (target_color == 'R' || target_color == 'G') {
+                    if (image[nr][nc] == 'R' || image[nr][nc] == 'G') {
+                        image_explore[nr][nc] = true;
+                        future_visit.push({ nr, nc });
+                    }
+                }
+                else {
+                    if (image[nr][nc] == 'B') {
+                        image_explore[nr][nc] = true;
+                        future_visit.push({ nr, nc });
+                    }
+                }
+            }
+        }
+    }
+}
+
+void exploring_nomal(int start_r, int start_c, vector<vector<char>>& image, vector<vector<bool>>& image_explore, int len_max)
+{
+    queue<pair<int, int>> future_visit;
+    char target_color = image[start_r][start_c];
+    image_explore[start_r][start_c] = true;
+    future_visit.push({ start_r, start_c });
+
+    const int dr[4] = { -1, 1, 0, 0 };
+    const int dc[4] = { 0, 0, -1, 1 };
+
+    while (!future_visit.empty()) {
+        pair<int, int> current = future_visit.front();
+        int r = current.first;
+        int c = current.second;
+        future_visit.pop();
+
+        for (int d = 0; d < 4; ++d) {
+            int nr = r + dr[d];
+            int nc = c + dc[d];
+            if (nr < 0 || nr >= len_max || nc < 0 || nc >= len_max) continue;
+
+            if (!image_explore[nr][nc] && image[nr][nc] == target_color) {
+                image_explore[nr][nc] = true;
+                future_visit.push({ nr, nc });
+            }
+        }
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0); cout.tie(0);
+
+    int n;
+    cin >> n;
+    vector<vector<char>> image_nomal(n, vector<char>(n));
+    vector<vector<bool>> image_explore_nomal(n, vector<bool>(n));
+    vector<vector<char>> image_rg(n, vector<char>(n));
+    vector<vector<bool>> image_explore_rg(n, vector<bool>(n));
+
+    for (int i = 0; i < n; i++) {
+        string input;
+        cin >> input;
+        for (int j = 0; j < n; j++) {
+            image_nomal[i][j] = input[j];
+            image_explore_nomal[i][j] = false;
+        }
+    }
+
+    image_rg = image_nomal;
+    image_explore_rg = image_explore_nomal;
+
+    int cnt_1 = 0, cnt_2 = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (!image_explore_nomal[i][j]) {
+                exploring_nomal(i, j, image_nomal, image_explore_nomal, n);
+                cnt_1++;
+            }
+            if (!image_explore_rg[i][j]) {
+                exploring_rg(i, j, image_rg, image_explore_rg, n);
+                cnt_2++;
+            }
+        }
+    }
+    cout << cnt_1 << " " << cnt_2;
+}
