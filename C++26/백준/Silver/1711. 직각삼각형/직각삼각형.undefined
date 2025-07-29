@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+long long gcd(long long a, long long b) {
+    a = abs(a);
+    b = abs(b);
+    while (b) {
+        a %= b;
+        swap(a, b);
+    }
+    return a;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int n;
+    cin >> n;
+
+    vector<long long> x(n), y(n);  
+    for (int i = 0; i < n; i++) {
+        cin >> x[i] >> y[i];
+    }
+
+    long long total_count = 0;
+
+    for (int j = 0; j < n; j++) {
+        map<pair<long long, long long>, int> vecs;
+
+        for (int i = 0; i < n; i++) {
+            if (i == j) continue;
+
+            long long dx = x[i] - x[j];
+            long long dy = y[i] - y[j];
+
+            long long common_divisor = gcd(dx, dy);
+            dx /= common_divisor;
+            dy /= common_divisor;
+
+            vecs[{dx, dy}]++;
+        }
+
+        long long sub_count = 0;
+        for (const auto& entry : vecs) {
+            const auto& vec = entry.first;
+            int count1 = entry.second;
+
+            long long vx = vec.first;
+            long long vy = vec.second;
+
+            long long pvx = -vy;
+            long long pvy = vx;
+
+            if (vecs.count({ pvx, pvy })) {
+                int count2 = vecs.at({ pvx, pvy });
+                sub_count += (long long)count1 * count2;
+            }
+        }
+        total_count += sub_count;
+    }
+
+    cout << total_count;
+}
