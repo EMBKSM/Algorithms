@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+void calculate_max_time(int start_node, vector<vector<pair<int, int>>>& forward_graph, vector<int>& in_degree, vector<int>& max_time_to_reach) {
+    queue<int> processing_queue;
+    processing_queue.push(start_node);
+
+    while (!processing_queue.empty()) {
+        int current_city = processing_queue.front();
+        processing_queue.pop();
+
+        for (const auto& edge : forward_graph[current_city]) {
+            auto [next_city, travel_time] = edge;
+
+            if (max_time_to_reach[next_city] < max_time_to_reach[current_city] + travel_time) {
+                max_time_to_reach[next_city] = max_time_to_reach[current_city] + travel_time;
+            }
+
+            in_degree[next_city]--;
+
+            if (in_degree[next_city] == 0) {
+                processing_queue.push(next_city);
+            }
+        }
+    }
+}
+
+int count_critical_path_edges(int end_node, vector<vector<pair<int, int>>>& reverse_graph, vector<int>& max_time_to_reach) {
+    int critical_edge_count = 0;
+
+    vector<bool> is_visited(max_time_to_reach.size(), false);
+    queue<int> processing_queue;
+
+    processing_queue.push(end_node);
+    is_visited[end_node] = true;
+
+    while (!processing_queue.empty()) {
+        int current_city = processing_queue.front();
+        processing_queue.pop();
+
+        for (const auto& edge : reverse_graph[current_city]) {
+            auto [previous_city, travel_time] = edge;
+
+            if (max_time_to_reach[current_city] - travel_time == max_time_to_reach[previous_city]) {
+                critical_edge_count++;
+                
+                if (!is_visited[previous_city]) {
+                    is_visited[previous_city] = true;
+                    processing_queue.push(previous_city);
+                }
+            }
+        }
+    }
+
+    return critical_edge_count;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int num_cities, num_roads;
+    cin >> num_cities >> num_roads;
+
+    vector<vector<pair<int, int>>> forward_graph(num_cities + 1);
+    vector<vector<pair<int, int>>> reverse_graph(num_cities + 1);
+    vector<int> in_degree(num_cities + 1, 0);
+    vector<int> max_time_to_reach(num_cities + 1, 0);
+
+    for (int i = 0; i < num_roads; i++) {
+        int from_city, to_city, travel_time;
+        cin >> from_city >> to_city >> travel_time;
+
+        forward_graph[from_city].push_back({to_city, travel_time});
+        reverse_graph[to_city].push_back({from_city, travel_time});
+        in_degree[to_city]++;
+    }
+
+    int start_node, end_node;
+    cin >> start_node >> end_node;
+
+    calculate_max_time(start_node, forward_graph, in_degree, max_time_to_reach);
+
+    int critical_path_edge_count = count_critical_path_edges(end_node, reverse_graph, max_time_to_reach);
+
+    cout << max_time_to_reach[end_node] << '\n';
+    cout << critical_path_edge_count << '\n';
+
+    return 0;
+}
