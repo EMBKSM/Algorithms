@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int n;
+int a[100000], b[100000];
+long long dp[100000];
+vector<struct line> hull;
+
+const int MAX = 100000;
+
+struct line {
+	long long a, b;
+	double s;
+	line(long long a_, long long b_, double s_ = 0) : a(a_), b(b_), s(s_) {}
+};
+
+double cross(const line &f, const line &g) {
+	return (double)(g.b - f.b) / (f.a - g.a);
+}
+
+int main() {
+	ios_base::sync_with_stdio(0);
+	cin.tie(0);
+	cout.tie(0);
+
+	cin >> n;
+	
+    for (int i = 0; i < n; ++i){
+        cin >> a[i];
+    }
+	
+	for (int i = 0; i < n; ++i){
+		cin >> b[i];
+    }
+
+	for (int i = 1; i < n; ++i) {
+		line new_line(b[i - 1], dp[i - 1]);
+		
+		while (hull.size() >= 1) {
+			new_line.s = cross(new_line, hull.back());
+			if (new_line.s < hull.back().s)
+				hull.pop_back();
+			else
+				break;
+		}
+		hull.push_back(new_line);
+
+		long long x_coord = a[i];
+		int opt_pos = 0;
+		int left = 0, right = hull.size() - 1;
+
+		while (left <= right) {
+			int mid = (left + right) / 2;
+			if (hull[mid].s < x_coord) {
+				opt_pos = mid;
+				left = mid + 1;
+			} else {
+				right = mid - 1;
+			}
+		}
+
+		dp[i] = hull[opt_pos].a * x_coord + hull[opt_pos].b;
+	}
+
+	cout << dp[n - 1] << '\n';
+
+	return 0;
+}
