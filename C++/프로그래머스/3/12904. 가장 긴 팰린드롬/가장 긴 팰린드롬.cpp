@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define MIN(a, b) ((a) > (b) ? (b) : (a))
+
+long long manacher(const string& input) {
+    string renewal_input = "^";
+    for (auto a : input) {
+        renewal_input += "|";
+        renewal_input += a;
+    }
+    renewal_input += "|$";
+
+    int n = renewal_input.size();
+    long long* p = new long long[n];
+    memset(p, 0, n * sizeof(long long));
+
+    int C = 0, R = 0;
+
+    for (int i = 1; i < n - 1; i++) {
+        int mirror = 2 * C - i;
+
+        if (i < R) p[i] = MIN(R - i, p[mirror]);
+        else p[i] = 0;
+
+        while (renewal_input[i + 1 + p[i]] == renewal_input[i - 1 - p[i]])
+            p[i]++;
+
+        if (i + p[i] > R) {
+            C = i;
+            R = i + p[i];
+        }
+    }
+
+    return *max_element(p + 1, p + n - 1);
+}
+
+int solution(string s) {
+    int answer = manacher(s);
+
+    return answer;
+}
