@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+
+using ll = long long;
+using namespace std;
+
+vector<ll> get_min_weights(int n, int k, const vector<ll>& prefix_sum) {
+    vector<ll> min_weights;
+    min_weights.reserve(k + 1);
+
+    for (int i = 0; i <= k; ++i) {
+        if (i > n) continue;
+
+        int remaining_len = n - i;
+        ll current_min_sum = LLONG_MAX;
+
+        for (int j = 0; j <= i; ++j) {
+            int start_idx = j;
+            int end_idx = start_idx + remaining_len;
+
+            ll window_sum = prefix_sum[end_idx] - prefix_sum[start_idx];
+            current_min_sum = min(current_min_sum, window_sum);
+        }
+
+        min_weights.push_back(current_min_sum == LLONG_MAX ? 0 : current_min_sum);
+    }
+    return min_weights;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int N, K;
+    cin >> N >> K;
+
+    vector<ll> A(N), B(N);
+    for (int i = 0; i < N; ++i) cin >> A[i];
+    for (int i = 0; i < N; ++i) cin >> B[i];
+
+    vector<ll> prefix_A(N + 1, 0);
+    vector<ll> prefix_B(N + 1, 0);
+    for (int i = 0; i < N; ++i) {
+        prefix_A[i + 1] = prefix_A[i] + A[i];
+        prefix_B[i + 1] = prefix_B[i] + B[i];
+    }
+
+    vector<ll> min_weights_A = get_min_weights(N, K, prefix_A);
+    vector<ll> min_weights_B = get_min_weights(N, K, prefix_B);
+
+    ll min_wonbin_weight = LLONG_MAX;
+
+    for (int i = 0; i <= K; ++i) {
+        int removals_B = K - i;
+
+        ll weight_A = min_weights_A[i];
+        ll weight_B = min_weights_B[removals_B];
+
+        ll wonbin_gets = max(weight_A, weight_B);
+
+        min_wonbin_weight = min(min_wonbin_weight, wonbin_gets);
+    }
+
+    cout << min_wonbin_weight << '\n';
+}
