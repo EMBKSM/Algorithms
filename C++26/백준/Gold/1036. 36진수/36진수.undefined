@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int to_int(char c) {
+    if (isdigit(c)) return c - '0';
+    return c - 'A' + 10;
+}
+
+char to_char(int i) {
+    if (i < 10) return i + '0';
+    return i - 10 + 'A';
+}
+
+struct Base36Number {
+    vector<int> digits;
+
+    void normalize() {
+        int carry = 0;
+        for (size_t i = 0; i < digits.size(); ++i) {
+            digits[i] += carry;
+            carry = digits[i] / 36;
+            digits[i] %= 36;
+        }
+        while (carry > 0) {
+            digits.push_back(carry % 36);
+            carry /= 36;
+        }
+        while (digits.size() > 1 && digits.back() == 0) {
+            digits.pop_back();
+        }
+    }
+
+    bool operator<(const Base36Number& other) const {
+        if (digits.size() != other.digits.size()) {
+            return digits.size() < other.digits.size();
+        }
+        for (int i = digits.size() - 1; i >= 0; --i) {
+            if (digits[i] != other.digits[i]) {
+                return digits[i] < other.digits[i];
+            }
+        }
+        return false;
+    }
+
+    void add(const Base36Number& other) {
+        if (other.digits.size() > digits.size()) {
+            digits.resize(other.digits.size(), 0);
+        }
+        for (size_t i = 0; i < other.digits.size(); ++i) {
+            digits[i] += other.digits[i];
+        }
+    }
+};
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int N;
+    cin >> N;
+
+    Base36Number total_sum;
+    vector<Base36Number> potential_gains(36);
+
+    for (int i = 0; i < N; ++i) {
+        string s;
+        cin >> s;
+        reverse(s.begin(), s.end());
+
+        for (size_t j = 0; j < s.length(); ++j) {
+            int digit_val = to_int(s[j]);
+
+            if (total_sum.digits.size() <= j) total_sum.digits.resize(j + 1, 0);
+            total_sum.digits[j] += digit_val;
+            
+            int gain = 35 - digit_val;
+            if (potential_gains[digit_val].digits.size() <= j) potential_gains[digit_val].digits.resize(j + 1, 0);
+            potential_gains[digit_val].digits[j] += gain;
+        }
+    }
+
+    priority_queue<Base36Number> pq;
+    for (auto& gain : potential_gains) {
+        gain.normalize();
+        pq.push(gain);
+    }
+    
+    int K;
+    cin >> K;
+
+    for (int i = 0; i < K && !pq.empty(); ++i) {
+        total_sum.add(pq.top());
+        pq.pop();
+    }
+
+    total_sum.normalize();
+
+    if (total_sum.digits.empty() || (total_sum.digits.size() == 1 && total_sum.digits[0] == 0)) {
+        cout << "0\n";
+    } else {
+        for (int i = total_sum.digits.size() - 1; i >= 0; --i) {
+            cout << to_char(total_sum.digits[i]);
+        }
+        cout << "\n";
+    }
+}
