@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int n;
+vector<vector<int>> adj;
+vector<vector<int>> costs;
+vector<vector<long long>> dp;
+
+void dfs(int node) {
+    dp[node][0] = costs[node][0];
+    dp[node][1] = costs[node][1];
+
+    for (int child : adj[node]) {
+        dfs(child);
+
+        dp[node][0] += dp[child][1];
+        dp[node][1] += dp[child][0];
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    cin >> n;
+
+    adj.resize(n);
+    costs.resize(n, vector<int>(2));
+    dp.resize(n, vector<long long>(2));
+
+    for (int i = 0; i < n - 1; ++i) {
+        int p, c;
+        cin >> p >> c;
+        adj[p].push_back(c);
+    }
+
+    for (int i = 0; i < n; ++i) {
+        cin >> costs[i][0] >> costs[i][1];
+    }
+
+    dfs(0);
+
+    long long result = min(dp[0][0], dp[0][1]);
+    cout << result << "\n";
+
+}
