@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int n;
+    cin >> n;
+
+    int board[10][10];
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            cin >> board[i][j];
+        }
+    }
+
+    bool diag1[20] = { 0 };
+    bool diag2[20] = { 0 };
+    vector<pair<int, int>> available_squares;
+    int max_bishops = 0;
+    int total_max = 0;
+
+    function<void(int, int)> solve =
+        [&](int index, int count) {
+
+        max_bishops = max(max_bishops, count);
+
+        for (int i = index; i < available_squares.size(); ++i) {
+            int r = available_squares[i].first;
+            int c = available_squares[i].second;
+
+            if (!diag1[r + c] && !diag2[r - c + n - 1]) {
+                diag1[r + c] = true;
+                diag2[r - c + n - 1] = true;
+
+                solve(i + 1, count + 1);
+
+                diag1[r + c] = false;
+                diag2[r - c + n - 1] = false;
+            }
+        }
+    };
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if ((i + j) % 2 == 0 && board[i][j] == 1) {
+                available_squares.push_back({ i, j });
+            }
+        }
+    }
+
+    solve(0, 0);
+    total_max += max_bishops;
+
+    available_squares.clear();
+    max_bishops = 0;
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if ((i + j) % 2 != 0 && board[i][j] == 1) {
+                available_squares.push_back({ i, j });
+            }
+        }
+    }
+
+    solve(0, 0);
+    total_max += max_bishops;
+
+    cout << total_max << "\n";
+}
