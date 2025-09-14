@@ -1,0 +1,20 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+	int a, b, c;
+	cin >> a >> b >> c;
+	
+	vector<int> num_list(10, 0);
+
+	string d = to_string(a*b*c);
+
+	for (int i = 0; i < d.length(); i++) {
+		num_list[d[i] - '0']++;
+	}
+
+	for (auto e : num_list) {
+		cout << e << "\n";
+	}
+}
