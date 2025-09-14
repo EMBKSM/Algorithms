@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+	int n, sum =0;
+	string num_list;
+	
+	cin >> n >> num_list;
+
+	for (int i = 0; i < n; i++) {
+		sum += num_list[i] - '0';
+	}
+	cout << sum;
+}
