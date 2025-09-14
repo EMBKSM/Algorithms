@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main(){
+    int temp, x, y;
+    int min_x=11, min_y=11, max_x=-1, max_y=-1;
+    for(int i = 0 ;i < 4;i++){
+        cin >> temp;
+        if(min_x > temp){
+            min_x = temp;
+        }
+        if(max_x < temp){
+            max_x = temp;
+        }
+        cin >> temp;
+        if(min_y > temp){
+            min_y = temp;
+        }
+        if(max_y < temp){
+            max_y = temp;
+        }
+    }
+    x = max_x - min_x;
+    y = max_y - min_y;
+    
+    cout << pow((x>y)? x:y,2);
+}
