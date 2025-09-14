@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    long long s, f, m;
+    cin >> s >> f >> m;
+
+    long long total_marbles = s + f;
+
+    auto count_prime_in_combination = [&](long long p, long long n_val, long long k_val) {
+        long long f_val = n_val - k_val;
+        long long count = 0;
+        long long power_p = p;
+        while (power_p <= n_val) {
+            count += n_val / power_p - k_val / power_p - f_val / power_p;
+
+            if (power_p > n_val / p) {
+                break;
+            }
+            power_p *= p;
+        }
+        return count;
+        };
+
+    for (long long n = m; n >= 1; --n) {
+        if (n == 1) {
+            cout << 1 << "\n";
+            return 0;
+        }
+
+        bool is_divisible = true;
+        long long temp_n = n;
+
+        for (long long d = 2; d * d <= temp_n; ++d) {
+            if (temp_n % d == 0) {
+                long long exponent_in_n = 0;
+                while (temp_n % d == 0) {
+                    exponent_in_n++;
+                    temp_n /= d;
+                }
+
+                long long exponent_in_comb = count_prime_in_combination(d, total_marbles, s);
+
+                if (exponent_in_comb < exponent_in_n) {
+                    is_divisible = false;
+                    break;
+                }
+            }
+        }
+
+        if (!is_divisible) {
+            continue;
+        }
+
+        if (temp_n > 1) {
+            long long p = temp_n;
+            long long exponent_in_comb = count_prime_in_combination(p, total_marbles, s);
+            if (exponent_in_comb < 1) {
+                is_divisible = false;
+            }
+        }
+
+        if (is_divisible) {
+            cout << n << "\n";
+            return 0;
+        }
+    }
+}
