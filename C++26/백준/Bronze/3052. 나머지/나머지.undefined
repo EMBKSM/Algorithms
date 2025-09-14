@@ -1,0 +1,20 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+	vector<int> new_num;
+	int temp, cnt =0;
+
+	for (int i = 0; i < 10; i++) {
+		int mod_num;
+		cin >> temp;
+		
+		mod_num = temp % 42;
+		if (find(new_num.begin(), new_num.end(), mod_num) == new_num.end()) {
+			new_num.push_back(mod_num);
+			cnt++;
+		}
+	}
+	cout << cnt;
+}
