@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+	string club_list[9] = {"PROBRAIN", "GROW", "ARGOS", "ADMIN", "ANT", "MOTION", "SPG", "COMON", "ALMIGHTY"};
+	vector<int> club_best(9,0);
+	int n, temp;
+	
+	cin >> n;
+	for (int i = 0; i < 9;i++) {
+		for (int j = 0; j < n; j++) {
+			cin >> temp;
+
+			if (club_best[i] < temp) {
+				club_best[i] = temp;
+			}
+		}
+	}
+
+	cout << club_list[max_element(club_best.begin(), club_best.end()) - club_best.begin()];
+}
