@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAXN = 100001;
+const int MAX_NODES = 4 * MAXN + 100001 * 18;
+
+struct Node {
+    long long sum;
+    Node* l, * r;
+};
+
+Node node_pool[MAX_NODES];
+int node_cnt = 0;
+Node* roots[MAXN];
+int initial_arr[MAXN];
+
+Node* new_node() {
+    return &node_pool[node_cnt++];
+}
+
+void build(Node*& curr, int start, int end) {
+    curr = new_node();
+    if (start == end) {
+        curr->sum = initial_arr[start];
+        curr->l = curr->r = nullptr;
+        return;
+    }
+    int mid = start + (end - start) / 2;
+    build(curr->l, start, mid);
+    build(curr->r, mid + 1, end);
+    curr->sum = curr->l->sum + curr->r->sum;
+}
+
+void update(Node*& curr, Node* prev, int start, int end, int idx, int val) {
+    curr = new_node();
+    *curr = *prev;
+    if (start == end) {
+        curr->sum = val;
+        return;
+    }
+    int mid = start + (end - start) / 2;
+    if (idx <= mid) {
+        update(curr->l, prev->l, start, mid, idx, val);
+    }
+    else {
+        update(curr->r, prev->r, mid + 1, end, idx, val);
+    }
+    curr->sum = curr->l->sum + curr->r->sum;
+}
+
+long long query(Node* curr, int start, int end, int left, int right) {
+    if (!curr || right < start || end < left) {
+        return 0;
+    }
+    if (left <= start && end <= right) {
+        return curr->sum;
+    }
+    int mid = start + (end - start) / 2;
+    long long l_sum = query(curr->l, start, mid, left, right);
+    long long r_sum = query(curr->r, mid + 1, end, left, right);
+    return l_sum + r_sum;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int N;
+    cin >> N;
+    for (int i = 1; i <= N; ++i) {
+        cin >> initial_arr[i];
+    }
+
+    build(roots[0], 1, N);
+
+    int M;
+    cin >> M;
+
+    int update_count = 0;
+    for (int q = 0; q < M; ++q) {
+        int type;
+        cin >> type;
+        if (type == 1) {
+            int i, v;
+            cin >> i >> v;
+            update_count++;
+            update(roots[update_count], roots[update_count - 1], 1, N, i, v);
+        }
+        else {
+            int k, i, j;
+            cin >> k >> i >> j;
+            cout << query(roots[k], 1, N, i, j) << "\n";
+        }
+    }
+}
