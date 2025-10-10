@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int N, M, sqrtN;
+int arr[100001];
+int ans[100001];
+int cnt[1000001];
+int result = 0;
+
+struct Query {
+    int l, r, idx;
+};
+
+vector<Query> queries;
+
+bool compare(Query& a, Query& b) {
+    if (a.l / sqrtN != b.l / sqrtN) {
+        return a.l / sqrtN < b.l / sqrtN;
+    }
+    return a.r < b.r;
+}
+
+void add(int x) {
+    if (cnt[x] == 0) {
+        result++;
+    }
+    cnt[x]++;
+}
+
+void remove(int x) {
+    cnt[x]--;
+    if (cnt[x] == 0) {
+        result--;
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> N;
+    sqrtN = sqrt(N);
+
+    for (int i = 1; i <= N; i++) {
+        cin >> arr[i];
+    }
+
+    cin >> M;
+
+    for (int i = 0; i < M; i++) {
+        int l, r;
+        cin >> l >> r;
+        queries.push_back({ l, r, i });
+    }
+
+    sort(queries.begin(), queries.end(), compare);
+
+    int cur_l = queries[0].l;
+    int cur_r = queries[0].r;
+
+    for (int i = cur_l; i <= cur_r; i++) {
+        add(arr[i]);
+    }
+    ans[queries[0].idx] = result;
+
+    for (int i = 1; i < M; i++) {
+        int next_l = queries[i].l;
+        int next_r = queries[i].r;
+
+        while (cur_l < next_l) {
+            remove(arr[cur_l++]);
+        }
+        while (cur_l > next_l) {
+            add(arr[--cur_l]);
+        }
+        while (cur_r < next_r) {
+            add(arr[++cur_r]);
+        }
+        while (cur_r > next_r) {
+            remove(arr[cur_r--]);
+        }
+
+        ans[queries[i].idx] = result;
+    }
+
+    for (int i = 0; i < M; i++) {
+        cout << ans[i] << "\n";
+    }
+}
