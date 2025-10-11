@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAXN = 100001;
+int N, M;
+int arr[MAXN];
+vector<int> tree[4 * MAXN];
+
+void build(int node, int start, int end) {
+    if (start == end) {
+        tree[node].push_back(arr[start]);
+        return;
+    }
+
+    int mid = (start + end) / 2;
+    build(node * 2, start, mid);
+    build(node * 2 + 1, mid + 1, end);
+
+    tree[node].resize(tree[node * 2].size() + tree[node * 2 + 1].size());
+    merge(tree[node * 2].begin(), tree[node * 2].end(),
+        tree[node * 2 + 1].begin(), tree[node * 2 + 1].end(),
+        tree[node].begin());
+}
+
+int query(int node, int start, int end, int i, int j, int k) {
+    if (start > j || end < i) {
+        return 0;
+    }
+
+    if (i <= start && end <= j) {
+        return tree[node].end() - upper_bound(tree[node].begin(), tree[node].end(), k);
+    }
+
+    int mid = (start + end) / 2;
+    int left_result = query(node * 2, start, mid, i, j, k);
+    int right_result = query(node * 2 + 1, mid + 1, end, i, j, k);
+    return left_result + right_result;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> N;
+    for (int idx = 1; idx <= N; ++idx) {
+        cin >> arr[idx];
+    }
+
+    build(1, 1, N);
+
+    cin >> M;
+    for (int q = 0; q < M; ++q) {
+        int i, j, k;
+        cin >> i >> j >> k;
+        cout << query(1, 1, N, i, j, k) << "\n";
+    }
+}
