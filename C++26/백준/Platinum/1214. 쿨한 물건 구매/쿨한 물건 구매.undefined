@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+   ios_base::sync_with_stdio(0);
+   cin.tie(0);
+
+   long long d, p, q;
+   cin >> d >> p >> q;
+
+   long long a = min(p, q);
+   long long b = max(p, q);
+
+   long long ans = -1;
+
+   for (long long i = 0; i <= a; i++) {
+       long long current_val = i * b;
+
+       if (current_val >= d) {
+           if (ans == -1 || current_val < ans) {
+               ans = current_val;
+           }
+           break;
+       }
+
+       long long remain = d - current_val;
+       long long count_a = (remain + a - 1) / a;
+       long long total = current_val + (count_a * a);
+
+       if (ans == -1 || total < ans) {
+           ans = total;
+       }
+   }
+
+   cout << ans << "\n";
+
+   return 0;
+}
