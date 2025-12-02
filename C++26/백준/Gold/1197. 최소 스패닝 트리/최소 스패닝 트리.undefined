@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef pair<int, int> pii;
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int v, e;
+    cin >> v >> e;
+
+    vector<vector<pii>> adj(v + 1);
+
+    for (int i = 0; i < e; i++) {
+        int v_1, v_2, weight;
+        cin >> v_1 >> v_2 >> weight;
+        
+        adj[v_1].push_back({weight, v_2});
+        adj[v_2].push_back({weight, v_1});
+    }
+
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    
+    vector<bool> visited(v + 1, false);
+
+    pq.push({0, 1});
+
+    long long total_weight = 0;
+    int cnt = 0;
+
+    while (!pq.empty()) {
+        int cost = pq.top().first;
+        int curr = pq.top().second;
+        pq.pop();
+
+        if (visited[curr]) continue;
+
+        visited[curr] = true;
+        total_weight += cost;
+        cnt++;
+
+        for (auto &edge : adj[curr]) {
+            int next_cost = edge.first;
+            int next_node = edge.second;
+
+            if (!visited[next_node]) {
+                pq.push({next_cost, next_node});
+            }
+        }
+    }
+
+    cout << total_weight << "\n";
+}
