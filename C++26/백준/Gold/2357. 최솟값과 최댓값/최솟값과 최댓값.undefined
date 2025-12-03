@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int num_list[100000];
+pair<int, int> segtree[400000];
+
+pair<int, int> make_segtree(int node, int start, int end) {
+    if (start == end) {
+        return segtree[node] = { num_list[start], num_list[start] };
+    }
+
+    int mid = (start + end) / 2;
+    pair<int, int> left = make_segtree(node * 2, start, mid);
+    pair<int, int> right = make_segtree(node * 2 + 1, mid + 1, end);
+
+    return segtree[node] = {
+        min(left.first, right.first),
+        max(left.second, right.second)
+    };
+}
+
+pair<int, int> query(int node, int start, int end, int left, int right) {
+    if (left > end || right < start) {
+        return { 2000000000, 0 };
+    }
+
+    if (left <= start && end <= right) {
+        return segtree[node];
+    }
+
+    int mid = (start + end) / 2;
+
+    pair<int, int> l = query(node * 2, start, mid, left, right);
+    pair<int, int> r = query(node * 2 + 1, mid + 1, end, left, right);
+
+    return {
+        min(l.first, r.first),
+        max(l.second, r.second)
+    };
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int n, m;
+    cin >> n >> m;
+
+    for (int i = 0; i < n; i++) {
+        cin >> num_list[i];
+    }
+
+    make_segtree(1, 0, n - 1);
+
+    for (int i = 0; i < m; i++) {
+        int a, b;
+        cin >> a >> b;
+        pair<int, int> result = query(1, 0, n - 1, a - 1, b - 1);
+        cout << result.first << " " << result.second << "\n";
+    }
+}
