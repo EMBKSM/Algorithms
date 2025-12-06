@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define MOD 1000000007
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int num_menus;
+    cin >> num_menus;
+
+    vector<long long> scoville_scores(num_menus);
+    for (int i = 0; i < num_menus; i++) {
+        cin >> scoville_scores[i];
+    }
+
+    sort(scoville_scores.begin(), scoville_scores.end());
+
+    vector<long long> powers_of_two(num_menus);
+    powers_of_two[0] = 1;
+    for (int i = 1; i < num_menus; i++) {
+        powers_of_two[i] = (powers_of_two[i - 1] * 2) % MOD;
+    }
+
+    long long total_pain = 0;
+
+    for (int i = 0; i < num_menus; i++) {
+        long long max_contribution = (scoville_scores[i] * powers_of_two[i]) % MOD;
+        long long min_contribution = (scoville_scores[i] * powers_of_two[num_menus - 1 - i]) % MOD;
+        total_pain = (total_pain + max_contribution - min_contribution + MOD) % MOD;
+    }
+
+    cout << total_pain << "\n";
+}
