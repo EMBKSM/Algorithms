@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int num_list[10000];
+int result_arr[10000];
+bool visited[10000];
+int N, M;
+
+void sequence(int depth){
+    if(depth == M){
+        for(int i = 0; i < M; i++){
+            cout << result_arr[i] << " ";
+        }
+        cout << "\n";
+        return;
+    }
+
+    int prev_num = -1;
+
+    for(int i = 0; i < N; i++){
+        if(!visited[i] && prev_num != num_list[i]){
+            visited[i] = 1;
+            result_arr[depth] = num_list[i];
+            prev_num = num_list[i];
+            sequence(depth + 1);
+            visited[i] = 0;
+        }
+    }
+}
+
+int main(){
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    
+    cin >> N >> M;
+    
+    for(int i = 0; i < N; i++){
+        cin >> num_list[i];
+    }
+
+    sort(num_list, num_list + N);
+
+    sequence(0);
+}
