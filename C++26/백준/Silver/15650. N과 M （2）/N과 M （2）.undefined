@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int max_number;
+int sequence_length;
+int current_sequence[10];
+
+void generate_sequence(int current_depth, int start_number) {
+    if (current_depth == sequence_length) {
+        for (int i = 0; i < sequence_length; ++i) {
+            cout << current_sequence[i] << ' ';
+        }
+        cout << '\n';
+        return;
+    }
+
+    for (int number = start_number; number <= max_number; ++number) {
+        current_sequence[current_depth] = number;
+        generate_sequence(current_depth + 1, number + 1);
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> max_number >> sequence_length;
+
+    generate_sequence(0, 1);
+}
