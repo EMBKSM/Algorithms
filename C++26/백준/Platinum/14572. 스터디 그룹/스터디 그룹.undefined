@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct Student {
+    int skill;
+    int algo_mask;
+};
+
+bool cmp(const Student& a, const Student& b) {
+    return a.skill < b.skill;
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int student_count, algo_count, max_diff;
+    cin >> student_count >> algo_count >> max_diff;
+
+    vector<Student> students(student_count);
+
+    for(int i = 0; i < student_count; ++i) {
+        int known_count, skill_level;
+        cin >> known_count >> skill_level;
+        
+        int mask = 0;
+        for(int j = 0; j < known_count; ++j) {
+            int algo_idx;
+            cin >> algo_idx;
+            mask |= (1 << (algo_idx - 1));
+        }
+        students[i] = {skill_level, mask};
+    }
+
+    sort(students.begin(), students.end(), cmp);
+
+    vector<int> current_algo_counts(algo_count, 0);
+    int left_idx = 0;
+    long long max_efficiency = 0;
+
+    for(int right_idx = 0; right_idx < student_count; ++right_idx) {
+        for(int k = 0; k < algo_count; ++k) {
+            if((students[right_idx].algo_mask >> k) & 1) {
+                current_algo_counts[k]++;
+            }
+        }
+
+        while(students[right_idx].skill - students[left_idx].skill > max_diff) {
+            for(int k = 0; k < algo_count; ++k) {
+                if((students[left_idx].algo_mask >> k) & 1) {
+                    current_algo_counts[k]--;
+                }
+            }
+            left_idx++;
+        }
+
+        long long group_size = right_idx - left_idx + 1;
+        long long union_cnt = 0;
+        long long intersection_cnt = 0;
+
+        for(int k = 0; k < algo_count; ++k) {
+            if(current_algo_counts[k] > 0) union_cnt++;
+            if(current_algo_counts[k] == group_size) intersection_cnt++;
+        }
+
+        long long current_efficiency = (union_cnt - intersection_cnt) * group_size;
+        if(current_efficiency > max_efficiency) {
+            max_efficiency = current_efficiency;
+        }
+    }
+
+    cout << max_efficiency;
+}
