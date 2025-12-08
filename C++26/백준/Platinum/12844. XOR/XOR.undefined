@@ -1,0 +1,107 @@
+// 그저 사골우리듯이 사용하는 lazy segment tree...
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int n, m;
+vector<long long> arr;
+vector<long long> tree;
+vector<long long> lazy;
+
+void propagate(int node, int start, int end) {
+    if (lazy[node] != 0) {
+        if ((end - start + 1) % 2 == 1) {
+            tree[node] ^= lazy[node];
+        }
+        if (start != end) {
+            lazy[node * 2] ^= lazy[node];
+            lazy[node * 2 + 1] ^= lazy[node];
+        }
+        lazy[node] = 0;
+    }
+}
+
+void init(int node, int start, int end) {
+    if (start == end) {
+        tree[node] = arr[start];
+        return;
+    }
+    int mid = (start + end) / 2;
+    init(node * 2, start, mid);
+    init(node * 2 + 1, mid + 1, end);
+    tree[node] = tree[node * 2] ^ tree[node * 2 + 1];
+}
+
+void update_range(int node, int start, int end, int l, int r, int k) {
+    propagate(node, start, end);
+
+    if (start > r || end < l) {
+        return;
+    }
+
+    if (l <= start && end <= r) {
+        if ((end - start + 1) % 2 == 1) {
+            tree[node] ^= k;
+        }
+        if (start != end) {
+            lazy[node * 2] ^= k;
+            lazy[node * 2 + 1] ^= k;
+        }
+        return;
+    }
+
+    int mid = (start + end) / 2;
+    update_range(node * 2, start, mid, l, r, k);
+    update_range(node * 2 + 1, mid + 1, end, l, r, k);
+    tree[node] = tree[node * 2] ^ tree[node * 2 + 1];
+}
+
+long long query(int node, int start, int end, int l, int r) {
+    propagate(node, start, end);
+
+    if (start > r || end < l) {
+        return 0;
+    }
+
+    if (l <= start && end <= r) {
+        return tree[node];
+    }
+
+    int mid = (start + end) / 2;
+    return query(node * 2, start, mid, l, r) ^ query(node * 2 + 1, mid + 1, end, l, r);
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> n;
+
+    arr.resize(n + 1);
+    tree.resize(4 * n);
+    lazy.resize(4 * n, 0);
+
+    for (int i = 1; i <= n; ++i) {
+        cin >> arr[i];
+    }
+
+    init(1, 1, n);
+
+    cin >> m;
+
+    for (int i = 0; i < m; ++i) {
+        int type;
+        cin >> type;
+
+        if (type == 1) {
+            int l, r, k;
+            cin >> l >> r >> k;
+            update_range(1, 1, n, l + 1, r + 1, k);
+        }
+        else {
+            int l, r;
+            cin >> l >> r;
+            cout << query(1, 1, n, l + 1, r + 1) << "\n";
+        }
+    }
+}
