@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+string input_string;
+int string_length;
+int sorting_gap;
+vector<int> suffix_array;
+vector<int> group_rank;
+vector<int> temp_rank;
+vector<int> lcp_array;
+
+bool compare_suffixes(int i, int j) {
+    if (group_rank[i] != group_rank[j]) {
+        return group_rank[i] < group_rank[j];
+    }
+    i += sorting_gap;
+    j += sorting_gap;
+    return (i < string_length && j < string_length) ? (group_rank[i] < group_rank[j]) : (i > j);
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> input_string;
+    string_length = input_string.length();
+
+    suffix_array.resize(string_length);
+    group_rank.resize(string_length);
+    temp_rank.resize(string_length);
+    lcp_array.resize(string_length);
+
+    for (int i = 0; i < string_length; ++i) {
+        suffix_array[i] = i;
+        group_rank[i] = input_string[i];
+    }
+
+    sorting_gap = 1;
+
+    while (sorting_gap < string_length) {
+        sort(suffix_array.begin(), suffix_array.end(), compare_suffixes);
+
+        temp_rank[suffix_array[0]] = 0;
+        for (int i = 1; i < string_length; ++i) {
+            if (compare_suffixes(suffix_array[i - 1], suffix_array[i])) {
+                temp_rank[suffix_array[i]] = temp_rank[suffix_array[i - 1]] + 1;
+            }
+            else {
+                temp_rank[suffix_array[i]] = temp_rank[suffix_array[i - 1]];
+            }
+        }
+
+        for (int i = 0; i < string_length; ++i) {
+            group_rank[i] = temp_rank[i];
+        }
+
+        if (group_rank[suffix_array[string_length - 1]] == string_length - 1) {
+            break;
+        }
+
+        sorting_gap *= 2;
+    }
+
+    int match_length = 0;
+
+    for (int i = 0; i < string_length; ++i) {
+        if (group_rank[i] == 0) {
+            continue;
+        }
+
+        int prev_suffix_index = suffix_array[group_rank[i] - 1];
+
+        while (i + match_length < string_length &&
+            prev_suffix_index + match_length < string_length &&
+            input_string[i + match_length] == input_string[prev_suffix_index + match_length]) {
+            match_length++;
+        }
+
+        lcp_array[group_rank[i]] = match_length;
+
+        if (match_length > 0) {
+            match_length--;
+        }
+    }
+
+    long long total_substrings = (long long)string_length * (string_length + 1) / 2;
+    long long duplicate_substrings = 0;
+
+    for (int i = 0; i < string_length; ++i) {
+        duplicate_substrings += lcp_array[i];
+    }
+
+    cout << total_substrings - duplicate_substrings;
+}
