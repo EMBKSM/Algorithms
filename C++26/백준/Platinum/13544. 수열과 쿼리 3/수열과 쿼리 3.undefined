@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_NODES = 2500000;
+
+struct node {
+    int left_child;
+    int right_child;
+    int count;
+};
+
+int n, m;
+vector<int> arr;
+vector<int> distinct_values;
+vector<int> roots;
+node tree[MAX_NODES];
+int node_count = 0;
+
+void update(int previous_node_index, int& current_node_index, int start, int end, int target_value_index) {
+    current_node_index = ++node_count;
+    tree[current_node_index] = tree[previous_node_index];
+    tree[current_node_index].count++;
+
+    if (start == end) {
+        return;
+    }
+
+    int mid = (start + end) / 2;
+    if (target_value_index <= mid) {
+        update(tree[previous_node_index].left_child, tree[current_node_index].left_child, start, mid, target_value_index);
+    }
+    else {
+        update(tree[previous_node_index].right_child, tree[current_node_index].right_child, mid + 1, end, target_value_index);
+    }
+}
+
+int query(int right_node_index, int left_node_index, int start, int end, int query_start_index, int query_end_index) {
+    if (query_start_index > end || query_end_index < start) {
+        return 0;
+    }
+
+    if (query_start_index <= start && end <= query_end_index) {
+        return tree[right_node_index].count - tree[left_node_index].count;
+    }
+
+    int mid = (start + end) / 2;
+    return query(tree[right_node_index].left_child, tree[left_node_index].left_child, start, mid, query_start_index, query_end_index) +
+        query(tree[right_node_index].right_child, tree[left_node_index].right_child, mid + 1, end, query_start_index, query_end_index);
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> n;
+
+    arr.resize(n + 1);
+    for (int i = 1; i <= n; ++i) {
+        cin >> arr[i];
+        distinct_values.push_back(arr[i]);
+    }
+
+    sort(distinct_values.begin(), distinct_values.end());
+    distinct_values.erase(unique(distinct_values.begin(), distinct_values.end()), distinct_values.end());
+
+    int distinct_count = distinct_values.size();
+    roots.resize(n + 1);
+    roots[0] = 0;
+
+    for (int i = 1; i <= n; ++i) {
+        int value_index = lower_bound(distinct_values.begin(), distinct_values.end(), arr[i]) - distinct_values.begin();
+        update(roots[i - 1], roots[i], 0, distinct_count - 1, value_index);
+    }
+
+    cin >> m;
+
+    int last_ans = 0;
+
+    for (int q = 0; q < m; ++q) {
+        int a, b, c;
+        cin >> a >> b >> c;
+
+        int i = a ^ last_ans;
+        int j = b ^ last_ans;
+        int k = c ^ last_ans;
+
+        int search_index = upper_bound(distinct_values.begin(), distinct_values.end(), k) - distinct_values.begin();
+
+        if (search_index >= distinct_count) {
+            last_ans = 0;
+        }
+        else {
+            last_ans = query(roots[j], roots[i - 1], 0, distinct_count - 1, search_index, distinct_count - 1);
+        }
+
+        cout << last_ans << "\n";
+    }
+}
