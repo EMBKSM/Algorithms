@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int n, m, k;
+int arr[1000005];
+int cnt[1000005];
+int res[1000005];
+int distinct_count = 0;
+vector<int> compress_helper;
+
+struct query {
+    int s, e, idx;
+};
+
+bool cmp(const query &a, const query &b) {
+    int i = a.s / k;
+    int j = b.s / k;
+    return i == j ? a.e < b.e : i < j;
+}
+
+void add(int x) {
+    if (cnt[x] == 0) distinct_count++;
+    cnt[x]++;
+}
+
+void sub(int x) {
+    cnt[x]--;
+    if (cnt[x] == 0) distinct_count--;
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> n;
+    k = sqrt(n);
+
+    for (int i = 1; i <= n; i++) {
+        cin >> arr[i];
+        compress_helper.push_back(arr[i]);
+    }
+
+    sort(compress_helper.begin(), compress_helper.end());
+    compress_helper.erase(unique(compress_helper.begin(), compress_helper.end()), compress_helper.end());
+
+    for (int i = 1; i <= n; i++) {
+        arr[i] = lower_bound(compress_helper.begin(), compress_helper.end(), arr[i]) - compress_helper.begin();
+    }
+
+    cin >> m;
+    vector<query> q(m);
+    for (int i = 0; i < m; i++) {
+        cin >> q[i].s >> q[i].e;
+        q[i].idx = i;
+    }
+
+    sort(q.begin(), q.end(), cmp);
+
+    int l = 1;
+    int r = 0;
+
+    for (int i = 0; i < m; i++) {
+        while (l > q[i].s) add(arr[--l]);
+        while (r < q[i].e) add(arr[++r]);
+        while (l < q[i].s) sub(arr[l++]);
+        while (r > q[i].e) sub(arr[r--]);
+        res[q[i].idx] = distinct_count;
+    }
+
+    for (int i = 0; i < m; i++) {
+        cout << res[i] << "\n";
+    }
+}
