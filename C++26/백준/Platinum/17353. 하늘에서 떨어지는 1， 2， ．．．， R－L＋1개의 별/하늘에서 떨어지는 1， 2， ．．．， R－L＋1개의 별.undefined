@@ -1,0 +1,113 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int n, q;
+vector<long long> arr;
+vector<long long> tree;
+vector<long long> lazy_coefficient;
+vector<long long> lazy_constant;
+
+void propagate(int node, int start, int end) {
+    if (lazy_coefficient[node] == 0 && lazy_constant[node] == 0) {
+        return;
+    }
+
+    long long count = (long long)(end - start + 1);
+    long long index_sum = (long long)(start + end) * count / 2;
+
+    tree[node] += lazy_coefficient[node] * index_sum + lazy_constant[node] * count;
+
+    if (start != end) {
+        lazy_coefficient[node * 2] += lazy_coefficient[node];
+        lazy_constant[node * 2] += lazy_constant[node];
+        lazy_coefficient[node * 2 + 1] += lazy_coefficient[node];
+        lazy_constant[node * 2 + 1] += lazy_constant[node];
+    }
+
+    lazy_coefficient[node] = 0;
+    lazy_constant[node] = 0;
+}
+
+void init(int node, int start, int end) {
+    if (start == end) {
+        tree[node] = arr[start];
+        return;
+    }
+
+    int mid = (start + end) / 2;
+    init(node * 2, start, mid);
+    init(node * 2 + 1, mid + 1, end);
+    tree[node] = tree[node * 2] + tree[node * 2 + 1];
+}
+
+void update_range(int node, int start, int end, int l, int r, long long val_coefficient, long long val_constant) {
+    propagate(node, start, end);
+
+    if (start > r || end < l) {
+        return;
+    }
+
+    if (l <= start && end <= r) {
+        lazy_coefficient[node] += val_coefficient;
+        lazy_constant[node] += val_constant;
+        propagate(node, start, end);
+        return;
+    }
+
+    int mid = (start + end) / 2;
+    update_range(node * 2, start, mid, l, r, val_coefficient, val_constant);
+    update_range(node * 2 + 1, mid + 1, end, l, r, val_coefficient, val_constant);
+    tree[node] = tree[node * 2] + tree[node * 2 + 1];
+}
+
+long long query(int node, int start, int end, int l, int r) {
+    propagate(node, start, end);
+
+    if (start > r || end < l) {
+        return 0;
+    }
+
+    if (l <= start && end <= r) {
+        return tree[node];
+    }
+
+    int mid = (start + end) / 2;
+    return query(node * 2, start, mid, l, r) + query(node * 2 + 1, mid + 1, end, l, r);
+}
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    cin >> n;
+
+    arr.resize(n + 1);
+    tree.resize(4 * n);
+    lazy_coefficient.resize(4 * n, 0);
+    lazy_constant.resize(4 * n, 0);
+
+    for (int i = 1; i <= n; ++i) {
+        cin >> arr[i];
+    }
+
+    init(1, 1, n);
+
+    cin >> q;
+
+    for (int i = 0; i < q; ++i) {
+        int type;
+        cin >> type;
+
+        if (type == 1) {
+            int l, r;
+            cin >> l >> r;
+            update_range(1, 1, n, l, r, 1, 1 - l);
+        }
+        else {
+            int x;
+            cin >> x;
+            cout << query(1, 1, n, x, x) << "\n";
+        }
+    }
+}
