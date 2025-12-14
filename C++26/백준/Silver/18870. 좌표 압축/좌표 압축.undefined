@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int num_list[1000000];
+vector<int> kind;
+
+int main() {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+
+    int n;
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        cin >> num_list[i];
+        kind.push_back(num_list[i]);
+    }
+
+    sort(kind.begin(), kind.end());
+    kind.erase(unique(kind.begin(), kind.end()), kind.end());
+
+    for (int i = 0; i < n; i++) {
+        cout << lower_bound(kind.begin(), kind.end(), num_list[i]) - kind.begin() << " ";
+    }
+}
